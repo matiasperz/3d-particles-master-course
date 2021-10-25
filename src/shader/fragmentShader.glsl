@@ -2,6 +2,7 @@ varying vec3 vPosition;
 
 uniform vec3 uColor1;
 uniform vec3 uColor2;
+uniform float uScale;
 
 void main() {
   vec3 color = vec3(1.0, 0.0, 0.0);
@@ -20,5 +21,5 @@ void main() {
     depth * 0.3: (0, 0.3)
     depth * 0.3 + 0.2: (0.2, 0.5)
   */
-  gl_FragColor = vec4(color, depth * 0.3 + 0.2);
+  gl_FragColor = vec4(color, (depth * 0.3 + 0.2) * uScale);
 }

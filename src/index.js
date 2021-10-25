@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import Model from './model'
+import gsap from 'gsap'
 
 /*------------------------------
 Renderer
@@ -42,6 +43,7 @@ const cube = new THREE.Mesh( geometry, material );
 OrbitControls
 ------------------------------*/
 const controls = new OrbitControls( camera, renderer.domElement );
+controls.enabled = false
 
 
 /*------------------------------
@@ -85,11 +87,23 @@ buttons[1].addEventListener('click', () => {
 })
 
 /*------------------------------
+Clock
+------------------------------*/
+const clock = new THREE.Clock()
+
+/*------------------------------
 Loop
 ------------------------------*/
 const animate = function () {
   requestAnimationFrame( animate );
   renderer.render( scene, camera );
+
+  if(skull.isActive) {
+    skull.particlesMaterial.uniforms.uTime.value = clock.getElapsedTime()
+  }
+  if(horse.isActive) {
+    horse.particlesMaterial.uniforms.uTime.value = clock.getElapsedTime()
+  }
 };
 animate();
 
@@ -103,3 +117,22 @@ function onWindowResize() {
   renderer.setSize( window.innerWidth, window.innerHeight );
 }
 window.addEventListener( 'resize', onWindowResize, false );
+
+/*------------------------------
+Mouse move
+------------------------------*/
+function onMouseMove(e) {
+  const x = e.clientX
+  const y = e.clientY
+
+  const rotationX = gsap.utils.mapRange(0, window.innerHeight, -0.2, 0.2, y)
+  const rotationY = gsap.utils.mapRange(0, window.innerWidth, -0.2, 0.2, x)
+
+  console.log(rotationX)
+
+  gsap.to(scene.rotation, {
+    x: rotationX,
+    y: rotationY
+  })
+}
+window.addEventListener('mousemove', onMouseMove)

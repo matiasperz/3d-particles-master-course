@@ -6,6 +6,7 @@ import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler'
 import { BufferAttribute, BufferGeometry } from 'three'
 import vertexShader from './shader/vertexShader.glsl'
 import fragmentShader from './shader/fragmentShader.glsl'
+import gsap from 'gsap'
 
 class Model {
   constructor (obj) {
@@ -17,6 +18,9 @@ class Model {
     this.color1 = obj.color1
     this.color2 = obj.color2
 
+    this.isActive = false
+    this.duration = 0.8
+
     this.loader = new GLTFLoader()
     this.dragoLoader = new DRACOLoader()
     this.dragoLoader.setDecoderPath('./draco/')
@@ -27,6 +31,7 @@ class Model {
 
   init() {
     this.loader.load(this.file, (res) => {
+
       /* Original Mesh */
       this.mesh = res.scene.children[0]
 
@@ -38,14 +43,12 @@ class Model {
       this.geometry = this.mesh.geometry
 
       /* Particles Material */
-      // this.particlesMaterial = new THREE.PointsMaterial({
-      //   color: 'red',
-      //   size: 0.02
-      // })
       this.particlesMaterial = new THREE.ShaderMaterial({
         uniforms: {
           uColor1: { value: new THREE.Color(this.color1) },
-          uColor2: { value: new THREE.Color(this.color2) }
+          uColor2: { value: new THREE.Color(this.color2) },
+          uTime: { value: 0 },
+          uScale: { value: 0 }
         },
         vertexShader,
         fragmentShader,
@@ -58,22 +61,32 @@ class Model {
       /* Particles Geometry */
       const sampler = new MeshSurfaceSampler(this.mesh).build()
       const numParticles = 20000
+
       this.particlesGeometry = new THREE.BufferGeometry()
       const particlesPosition = new Float32Array(numParticles * 3)
+      const particlesRandomess = new Float32Array(numParticles * 3)
 
       for(let i = 0; i < numParticles; i++) {
         const i3 = i * 3
 
         const newPosition = new THREE.Vector3()
         sampler.sample(newPosition)
+
         particlesPosition.set([
           newPosition.x,
           newPosition.y,
           newPosition.z
         ], i3)
+
+        particlesRandomess.set([
+          Math.random() * 2 - 1, /* (-1, 1) */
+          Math.random() * 2 - 1,
+          Math.random() * 2 - 1
+        ], i3)
       }
 
       this.particlesGeometry.setAttribute('position', new BufferAttribute(particlesPosition, 3))
+      this.particlesGeometry.setAttribute('aRandom', new BufferAttribute(particlesRandomess, 3))
 
       /* Particles */
       this.particles = new THREE.Points(this.particlesGeometry, this.particlesMaterial)
@@ -86,10 +99,43 @@ class Model {
 
   add() {
     this.scene.add(this.particles)
+    
+    gsap.to(this.particlesMaterial.uniforms.uScale, {
+      value: 1,
+      duration: this.duration,
+      delay: this.duration / 2.5,
+      ease: 'power3.out'
+    })
+
+    if (!this.isActive) {
+      gsap.fromTo(this.particles.rotation, {
+        y: Math.PI
+      }, {
+        y: 0,
+        duration: this.duration,
+        ease: 'power3.out'
+      })
+    }
+
+    this.isActive = true
   }
 
   remove() {
-    this.scene.remove(this.particles)
+    gsap.to(this.particlesMaterial.uniforms.uScale, {
+      value: 0,
+      duration: this.duration,
+      ease: 'power3.out',
+      onComplete: () => {
+        this.scene.remove(this.particles)
+        this.isActive = false
+      }
+    })
+
+    gsap.to(this.particles.rotation, {
+      y: Math.PI,
+      duration: this.duration,
+      ease: 'power3.out'
+    })
   }
 }
 
