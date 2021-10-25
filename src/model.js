@@ -17,6 +17,7 @@ class Model {
     
     this.color1 = obj.color1
     this.color2 = obj.color2
+    this.background = obj.background
 
     this.isActive = false
     this.duration = 0.8
@@ -114,6 +115,11 @@ class Model {
         y: 0,
         duration: this.duration,
         ease: 'power3.out'
+      })
+
+      gsap.to('body', {
+        background: this.background,
+        duration: 0.8
       })
     }
 
