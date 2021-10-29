@@ -74,6 +74,22 @@ const horse = new Model({
   file: './models/horse.glb',
   scene
 })
+const avocado = new Model({
+  name: 'horse',
+  color1: 'green',
+  color2: 'white',
+  background: '#110047',
+  file: './models/avocado.glb',
+  scene
+})
+const bitcoin = new Model({
+  name: 'horse',
+  color1: 'white',
+  color2: 'white',
+  background: '#47001b',
+  file: './models/bitcoin.glb',
+  scene
+})
 
 /*------------------------------
 Controllers
@@ -82,10 +98,26 @@ const buttons = document.querySelectorAll('.button')
 buttons[0].addEventListener('click', () => {
   skull.add()
   horse.remove()
+  avocado.remove()
+  bitcoin.remove()
 })
 buttons[1].addEventListener('click', () => {
   horse.add()
   skull.remove()
+  avocado.remove()
+  bitcoin.remove()
+})
+buttons[2].addEventListener('click', () => {
+  avocado.add()
+  skull.remove()
+  horse.remove()
+  bitcoin.remove()
+})
+buttons[3].addEventListener('click', () => {
+  bitcoin.add()
+  skull.remove()
+  horse.remove()
+  avocado.remove()
 })
 
 /*------------------------------
